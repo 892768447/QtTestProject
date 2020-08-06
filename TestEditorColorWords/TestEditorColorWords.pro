@@ -17,10 +17,12 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     editorwidget.cpp \
-    main.cpp
+    main.cpp \
+    qscilexerqss.cpp
 
 HEADERS += \
-  editorwidget.h
+  editorwidget.h \
+  qscilexerqss.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

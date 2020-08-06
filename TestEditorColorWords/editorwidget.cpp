@@ -11,15 +11,16 @@ EditorWidget::EditorWidget(QWidget *parent) : QWidget(parent) {
   layout->addWidget(editor);
 
   //语法分析器
-  lexer = new QsciLexerCSS(editor);
+  lexer = new QsciLexerQSS(editor);
   editor->setLexer(lexer);
   // 显示行号
   editor->setMarginLineNumbers(0, true);
   editor->setMarginWidth(0, 50);
 
   //循环生成测试数据
-  for (int i = 0; i < 300; i++) generateText();
+  for (int i = 0; i < 2; i++) generateText();
 
+  /*
   QRegExp exp(
       "(:\\s*([a-zA-Z]+|#([0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8}))\\s*;"
       "|["
@@ -59,6 +60,7 @@ EditorWidget::EditorWidget(QWidget *parent) : QWidget(parent) {
       pos += exp.matchedLength();
     }
   });
+  */
 }
 
 void EditorWidget::generateText() {

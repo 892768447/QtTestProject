@@ -6,6 +6,7 @@
 #include <Qsci/qscistyle.h>
 #include <Qsci/qscistyledtext.h>
 #include <QWidget>
+#include "qscilexerqss.h"
 
 class EditorWidget : public QWidget {
   Q_OBJECT
@@ -19,7 +20,7 @@ class EditorWidget : public QWidget {
 
  private:
   QsciScintilla *editor;
-  QsciLexerCSS *lexer;
+  QsciLexerQSS *lexer;
 };
 
 #endif  // EDITORWIDGET_H
