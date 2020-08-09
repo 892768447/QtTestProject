@@ -2,4 +2,5 @@ TEMPLATE = subdirs
 
 SUBDIRS += \
   TestColorRegExp \
-  TestEditorColorWords
+  TestEditorColorWords \
+  TestQsciLexerQSS
