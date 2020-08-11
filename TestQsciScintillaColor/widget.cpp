@@ -2,8 +2,10 @@
 
 #include <QDebug>
 
+#include <Qsci/qscilexercss.h>
 #include <QMouseEvent>
-#include "qscilexerqss.h"
+#include <QPainter>
+#include <QToolTip>
 #include "ui_widget.h"
 
 Widget::Widget(QWidget *parent) : QWidget(parent), ui(new Ui::Widget) {
@@ -13,10 +15,9 @@ Widget::Widget(QWidget *parent) : QWidget(parent), ui(new Ui::Widget) {
   ui->textEdit->setUtf8(true);
   ui->textEdit->SendScintilla(QsciScintilla::SCI_SETCODEPAGE,
                               QsciScintilla::SC_CP_UTF8);
-  ui->textEdit->SendScintilla(
-      QsciScintilla::SCI_SETWORDCHARS,
-      "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-");
   ui->textEdit->setLexer(new QsciLexerCSS(ui->textEdit));
+  ui->textEdit->SendScintilla(QsciScintilla::SCI_SETWORDCHARS,
+                              ui->textEdit->lexer()->wordCharacters());
 
   exp = QRegExp(
       "(:\\s*([a-zA-Z]+|#([0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8}))\\s*;|["
@@ -172,15 +173,120 @@ Widget::Widget(QWidget *parent) : QWidget(parent), ui(new Ui::Widget) {
 
 Widget::~Widget() { delete ui; }
 
+int Widget::offsetAsPosition(int start, int offset) {
+  return ui->textEdit->SendScintilla(QsciScintilla::SCI_POSITIONRELATIVE, start,
+                                     offset);
+}
+
+QFont Widget::fontForStyle(int style) const {
+  char fontName[64];
+  int len = ui->textEdit->SendScintilla(QsciScintilla::SCI_STYLEGETFONT, style,
+                                        fontName);
+  int size =
+      ui->textEdit->SendScintilla(QsciScintilla::SCI_STYLEGETSIZE, style);
+  bool italic =
+      ui->textEdit->SendScintilla(QsciScintilla::SCI_STYLEGETITALIC, style);
+  int weight =
+      ui->textEdit->SendScintilla(QsciScintilla::SCI_STYLEGETWEIGHT, style);
+  return QFont(QString::fromUtf8(fontName, len), size, weight, italic);
+}
+
+QRect Widget::characterRect(int start, int offset, QString text) {
+  int position = offsetAsPosition(start, offset);
+  int x = ui->textEdit->SendScintilla(QsciScintillaBase::SCI_POINTXFROMPOSITION,
+                                      0, position);
+  int y = ui->textEdit->SendScintilla(QsciScintillaBase::SCI_POINTYFROMPOSITION,
+                                      0, position);
+
+  int style =
+      ui->textEdit->SendScintilla(QsciScintillaBase::SCI_GETSTYLEAT, position);
+  QFontMetrics metrics(fontForStyle(style));
+  QRect rect(x, y, metrics.width(text), metrics.height());
+  qDebug() << rect;
+  return rect;
+}
+
 bool Widget::eventFilter(QObject *obj, QEvent *event) {
   Q_UNUSED(obj);
+  if (event->type() == QEvent::Paint) {
+    // 得到当前可视范围内的文字
+    int first_visible_line =
+        ui->textEdit->SendScintilla(QsciScintilla::SCI_GETFIRSTVISIBLELINE);
+    int last_visible_line =
+        first_visible_line +
+        ui->textEdit->SendScintilla(QsciScintilla::SCI_LINESONSCREEN);
+    int start_pos = ui->textEdit->SendScintilla(
+        QsciScintilla::SCI_POSITIONFROMLINE, first_visible_line);
+    int end_pos = ui->textEdit->SendScintilla(
+        QsciScintilla::SCI_GETLINEENDPOSITION, last_visible_line);
+    QString text = ui->textEdit->text(start_pos, end_pos);
+    // 匹配文字区域并计算所在坐标
+    int pos = 0;
+    QPainter painter;
+    painter.begin(static_cast<QWidget *>(obj));
+    while ((pos = exp.indexIn(text, pos)) != -1) {
+      if (exp.matchedLength()) {
+        QString m_text = exp.cap(0).toLower();
+        if (m_text.startsWith("rgb")) {
+          QRect rect = characterRect(start_pos, pos, m_text);
+          painter.setBrush(Qt::red);
+          painter.fillRect(rect, Qt::red);
+          painter.setPen(Qt::yellow);
+          painter.drawRect(rect);
+          painter.drawText(0, 0, "hello");
+        }
+      }
+      pos += exp.matchedLength();
+    }
+    painter.end();
+  }
+
+  /*
   if (event->type() == QEvent::MouseMove) {
-    QPoint pos = static_cast<QMouseEvent *>(event)->pos();
+    QMouseEvent *mouse_event = static_cast<QMouseEvent *>(event);
+    QPoint pos = mouse_event->pos();
     int line = ui->textEdit->lineAt(pos);
     QString text = ui->textEdit->text(line);
     if (line > -1 && exp.indexIn(text, 0) != -1) {
-      qDebug() << pos << line << exp.capturedTexts();
+      QString color_str = exp.cap(0).toLower();
+      QColor color;
+      if (color_str.startsWith("rgb")) {
+        color_str = color_str.remove("rgba")
+                        .remove("rgb")
+                        .remove("(")
+                        .remove(")")
+                        .remove(";")
+                        .remove(" ")
+                        .trimmed();
+        QStringList color_list = color_str.split(",");
+        //        qDebug() << color_list.length() << color_list;
+        if (color_list.length() >= 3) {
+          color.setRed(color_list.at(0).toInt());
+          color.setGreen(color_list.at(1).toInt());
+          color.setBlue(color_list.at(2).toInt());
+          if (color_list.length() >= 4) {
+            if (color_list.at(3).length() > 0) {
+              if (color_list.at(3).toInt() > 1)
+                color.setAlpha(color_list.at(3).toInt());
+              else
+                color.setAlphaF(color_list.at(3).toFloat());
+            }
+          }
+        }
+      } else {
+        color_str = color_str.remove(":").remove(";").trimmed();
+        color.setNamedColor(color_str);
+      }
+      //      qDebug() << pos << line << color_str << color;
+      if (color.isValid())
+        QToolTip::showText(
+            QCursor::pos(),
+            QStringLiteral("<b "
+                           "style=\"font-size:18px;font-weight:"
+                           "bold;background:%1;\">&nbsp;　&nbsp;　&nbsp;</b>")
+                .arg(color.name(QColor::HexArgb)));
     }
   }
+  */
   return false;
 }

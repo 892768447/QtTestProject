@@ -17,11 +17,9 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     main.cpp \
-    qscilexerqss.cpp \
     widget.cpp
 
 HEADERS += \
-    qscilexerqss.h \
     widget.h
 
 FORMS += \
