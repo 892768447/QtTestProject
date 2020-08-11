@@ -20,7 +20,7 @@ class EditorWidget : public QWidget {
 
  private:
   QsciScintilla *editor;
-  QsciLexerQSS *lexer;
+  QsciLexerCSS *lexer;
 };
 
 #endif  // EDITORWIDGET_H

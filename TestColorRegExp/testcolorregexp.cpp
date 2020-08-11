@@ -7,14 +7,14 @@ TestColorRegExp::TestColorRegExp() {}
 
 void TestColorRegExp::test() {
   QString text =
-      "background:rgb(255,255,255);\n"
-      "background: RGB(255,255 ,255);\n"
-      "background: rGb(   255  ,  255 , 255);\n"
-      "background: rgb(255,   255 , 255);\n"
-      "background:rGba(255,255,255, 10);  \n"
-      "background:rGba(255,255,255, 0.2)   ;\n"
-      "background: rgba( 255, 255 , 255  , 23);\n"
-      "background: RGBA(255 ,255 ,255, 0.2);\n"
+      "background:rgb(100,200,255);\n"
+      "background: RGB(100,200 ,255);\n"
+      "background: rGb(   100  ,  200 , 255);\n"
+      "background: rgb(100,   200 , 255);\n"
+      "background:rGba(100,200,255, 10);  \n"
+      "background:rGba(100,200,255, 0.2)   ;\n"
+      "background: rgba( 100, 200 , 255  , 23);\n"
+      "background: RGBA(100 ,200 ,255, 0.2);\n"
       "color:   red;\n"
       "color: White ;\n"
       "color: BLACK;\n"
@@ -42,8 +42,9 @@ void TestColorRegExp::test() {
   int pos = 0;
 
   while ((pos1 = exp1.indexIn(text, pos1)) != -1) {
-    qDebug() << pos1 << pos1 + exp1.matchedLength() << exp1.capturedTexts()
-             << exp1.pos(0);
+    //    qDebug() << pos1 << pos1 + exp1.matchedLength() <<
+    //    exp1.capturedTexts()
+    //             << exp1.pos(0);
     pos1 += exp1.matchedLength();
   }
 
@@ -58,9 +59,9 @@ void TestColorRegExp::test() {
   qDebug() << "\n\n";
 
   while ((pos = exp.indexIn(text, pos)) != -1) {
-    qDebug() << pos << pos + exp.matchedLength() << exp.capturedTexts()
-             << exp.pos(0) << exp.cap(0).length();
-    qDebug() << "text: " << text.mid(exp.pos(0), exp.cap(0).length());
+    //    qDebug() << pos << pos + exp.matchedLength() << exp.capturedTexts()
+    //             << exp.pos(0) << exp.cap(0).length();
+    //    qDebug() << "text: " << text.mid(exp.pos(0), exp.cap(0).length());
     pos += exp.matchedLength();
     //    qDebug() << exp.capturedTexts();
     //    qDebug() << exp.cap(0).remove(QRegExp("[;: ]")).toLower();
@@ -80,5 +81,5 @@ void TestColorRegExp::test() {
     css.mid(exp.pos(0), exp.cap(0).length());
     pos += exp.matchedLength();
   }
-  qDebug() << "use time:" << time.elapsed() / 1000.0 << "s";
+  //  qDebug() << "use time:" << time.elapsed() / 1000.0 << "s";
 }

@@ -111,14 +111,15 @@ void QsciLexerQSS::styleText(int start, int end) {
           color = QColor(r, g, b);
         QString value = rgbExp.cap(0).remove(";");
 
-        startStyling(pos, 0xFF);
+        startStyling(start + pos, 0xFF);
 
         QsciStyle style(0, value, QColor("red"), color, editor()->font(), true);
         setStyling(value.length(), style);
         //        editor()->SendScintilla(QsciScintilla::SCI_SETSTYLING,
         //        value.length(),
         //                                style.style());
-        qDebug() << "style:" << style.style() << color << value;
+        qDebug() << start << end << pos << value.length()
+                 << "style:" << style.style() << color << value;
         pos += rgbExp.matchedLength();
       }
     }
