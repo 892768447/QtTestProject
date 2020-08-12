@@ -30,7 +30,7 @@
     <number>0</number>
    </property>
    <item>
-    <widget class="QsciScintilla" name="textEdit">
+    <widget class="EditorWidget" name="textEdit">
      <property name="toolTip">
       <string/>
      </property>
@@ -43,9 +43,10 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>QsciScintilla</class>
+   <class>EditorWidget</class>
    <extends>QFrame</extends>
-   <header>Qsci/qsciscintilla.h</header>
+   <header location="global">editorwidget.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources/>

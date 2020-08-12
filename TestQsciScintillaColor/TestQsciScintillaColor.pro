@@ -16,10 +16,14 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    editorwidget.cpp \
     main.cpp \
+    mapwidget.cpp \
     widget.cpp
 
 HEADERS += \
+    editorwidget.h \
+    mapwidget.h \
     widget.h
 
 FORMS += \

@@ -15,15 +15,8 @@ class Widget : public QWidget {
  public:
   Widget(QWidget *parent = nullptr);
   ~Widget();
-  int offsetAsPosition(int start, int offset);
-  QFont fontForStyle(int style) const;
-  QRect characterRect(int start, int offset, QString text);
 
  private:
   Ui::Widget *ui;
-  QRegExp exp;
-
- protected:
-  bool eventFilter(QObject *obj, QEvent *event) override;
 };
 #endif  // WIDGET_H

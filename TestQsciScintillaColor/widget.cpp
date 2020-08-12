@@ -10,22 +10,6 @@
 
 Widget::Widget(QWidget *parent) : QWidget(parent), ui(new Ui::Widget) {
   ui->setupUi(this);
-  ui->textEdit->viewport()->setMouseTracking(true);
-  ui->textEdit->viewport()->installEventFilter(this);
-  ui->textEdit->setUtf8(true);
-  ui->textEdit->SendScintilla(QsciScintilla::SCI_SETCODEPAGE,
-                              QsciScintilla::SC_CP_UTF8);
-  ui->textEdit->setLexer(new QsciLexerCSS(ui->textEdit));
-  ui->textEdit->SendScintilla(QsciScintilla::SCI_SETWORDCHARS,
-                              ui->textEdit->lexer()->wordCharacters());
-
-  exp = QRegExp(
-      "(:\\s*([a-zA-Z]+|#([0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8}))\\s*;|["
-      "rR][gG][Bb][Aa]?\\((\\s*(2[0-4][0-9]|25[0-5]|[01]?[0-9][0-9]?)\\s*,\\s*)"
-      "{2}\\s*(2[0-4][0-9]|25[0-5]|[01]?[0-9][0-9]?)\\s*,?\\s*(0\\.\\d{1,2}|2["
-      "0-4][0-9]|25[0-5]|[01]?[0-9][0-9])?\\)\\s*;)");
-  exp.setMinimal(false);
-
   ui->textEdit->setText(QStringLiteral(
       "/*通用样式*/\n* {\n    font-family: \"SF Pro SC\", \"SF Pro Display\", "
       "\"SF Pro Icons\", \"PingFang SC\", \"Helvetica Neue\", \"Helvetica\", "
@@ -173,39 +157,7 @@ Widget::Widget(QWidget *parent) : QWidget(parent), ui(new Ui::Widget) {
 
 Widget::~Widget() { delete ui; }
 
-int Widget::offsetAsPosition(int start, int offset) {
-  return ui->textEdit->SendScintilla(QsciScintilla::SCI_POSITIONRELATIVE, start,
-                                     offset);
-}
-
-QFont Widget::fontForStyle(int style) const {
-  char fontName[64];
-  int len = ui->textEdit->SendScintilla(QsciScintilla::SCI_STYLEGETFONT, style,
-                                        fontName);
-  int size =
-      ui->textEdit->SendScintilla(QsciScintilla::SCI_STYLEGETSIZE, style);
-  bool italic =
-      ui->textEdit->SendScintilla(QsciScintilla::SCI_STYLEGETITALIC, style);
-  int weight =
-      ui->textEdit->SendScintilla(QsciScintilla::SCI_STYLEGETWEIGHT, style);
-  return QFont(QString::fromUtf8(fontName, len), size, weight, italic);
-}
-
-QRect Widget::characterRect(int start, int offset, QString text) {
-  int position = offsetAsPosition(start, offset);
-  int x = ui->textEdit->SendScintilla(QsciScintillaBase::SCI_POINTXFROMPOSITION,
-                                      0, position);
-  int y = ui->textEdit->SendScintilla(QsciScintillaBase::SCI_POINTYFROMPOSITION,
-                                      0, position);
-
-  int style =
-      ui->textEdit->SendScintilla(QsciScintillaBase::SCI_GETSTYLEAT, position);
-  QFontMetrics metrics(fontForStyle(style));
-  QRect rect(x, y, metrics.width(text), metrics.height());
-  qDebug() << rect;
-  return rect;
-}
-
+/**
 bool Widget::eventFilter(QObject *obj, QEvent *event) {
   Q_UNUSED(obj);
   if (event->type() == QEvent::Paint) {
@@ -287,6 +239,7 @@ bool Widget::eventFilter(QObject *obj, QEvent *event) {
                 .arg(color.name(QColor::HexArgb)));
     }
   }
-  */
+  /
   return false;
 }
+*/
