@@ -18,12 +18,10 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
     editorwidget.cpp \
     main.cpp \
-    mapwidget.cpp \
     widget.cpp
 
 HEADERS += \
     editorwidget.h \
-    mapwidget.h \
     widget.h
 
 FORMS += \

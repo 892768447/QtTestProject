@@ -18,6 +18,7 @@ void TestColorRegExp::test() {
       "border:1px solid   red ; \n"
       "border:1px solid   #FF00ff ; \n"
       "border:1px solid rgb(23,32,45) ; \n"
+      "border: none;\n"
       "color:   red;\n"
       "color: White ;\n"
       "color: BLACK;\n"
@@ -27,17 +28,24 @@ void TestColorRegExp::test() {
 
   QRegExp exp1("#([0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})\\s*;");
   QRegExp exp2("\\s*[^#][a-zA-Z]+\\s*;");
-  QRegExp exp(
+  QRegExp exp3(
       "[rR][gG][Bb][Aa]?\\((\\s*(2[0-4][0-9]|25[0-5]|[01]?[0-9][0-9]?)\\s*,\\s*"
       "){2}\\s*(2[0-4][0-9]|25[0-5]|[01]?[0-9][0-9]?)\\s*,?\\s*(0\\.\\d{1,2}|2["
       "0-4][0-9]|25[0-5]|[01]?[0-9][0-9])?\\)\\s*;");
+  QRegExp exp4(
+      "([rR][gG][Bb][Aa]?\\((\\s*(2[0-4][0-9]|25[0-5]|[01]?[0-9][0-9]?)\\s*,"
+      "\\s*){2}\\s*(2[0-4][0-9]|25[0-5]|[01]?[0-9][0-9]?)\\s*,?\\s*(0\\.\\d{1,"
+      "2}|2[0-4][0-9]|25[0-5]|[01]?[0-9][0-9])?\\)\\s*;)|(#([0-9a-fA-F]{3}|[0-"
+      "9a-fA-F]{6}|[0-9a-fA-F]{8})\\s*;)|(\\s*[^#][a-zA-Z]+\\s*;)");
   exp1.setMinimal(false);
   exp2.setMinimal(false);
-  exp.setMinimal(false);
+  exp3.setMinimal(false);
+  exp4.setMinimal(false);
 
   int pos1 = 0;
   int pos2 = 0;
-  int pos = 0;
+  int pos3 = 0;
+  int pos4 = 0;
 
   while ((pos1 = exp1.indexIn(text, pos1)) != -1) {
     qDebug() << pos1 << pos1 + exp1.matchedLength() << exp1.capturedTexts()
@@ -55,11 +63,20 @@ void TestColorRegExp::test() {
 
   qDebug() << "\n\n";
 
-  while ((pos = exp.indexIn(text, pos)) != -1) {
-    qDebug() << pos << pos + exp.matchedLength() << exp.capturedTexts()
-             << exp.pos(0) << exp.cap(0).length();
-    qDebug() << "text: " << text.mid(exp.pos(0), exp.cap(0).length());
-    pos += exp.matchedLength();
+  while ((pos3 = exp3.indexIn(text, pos3)) != -1) {
+    qDebug() << pos3 << pos3 + exp3.matchedLength() << exp3.capturedTexts()
+             << exp3.pos(0) << exp3.cap(0).length();
+    qDebug() << "text: " << text.mid(exp3.pos(0), exp3.cap(0).length());
+    pos3 += exp3.matchedLength();
+    //    qDebug() << exp.capturedTexts();
+    //    qDebug() << exp.cap(0).remove(QRegExp("[;: ]")).toLower();
+  }
+
+  qDebug() << "\n\nexp4\n\n";
+
+  while ((pos4 = exp4.indexIn(text, pos4)) != -1) {
+    qDebug() << exp4.capturedTexts();
+    pos4 += exp4.matchedLength();
     //    qDebug() << exp.capturedTexts();
     //    qDebug() << exp.cap(0).remove(QRegExp("[;: ]")).toLower();
   }
