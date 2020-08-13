@@ -33,6 +33,7 @@ class EditorWidget : public QsciScintilla {
       "9a-fA-F]{6}|[0-9a-fA-F]{8})\\s*;)|(\\s*[^#][a-zA-Z]+\\s*;)");
   QList<ColorEntry> colorEntries;
   void parseColors();  //解析文本得到坐标也颜色值
+  void initEditor();
 
  protected:
   void paintEvent(QPaintEvent *event) override;
