@@ -1,10 +1,12 @@
 ﻿#include "editorwidget.h"
 #include <Qsci/qscilexercss.h>
+#include <qcssparser.h>
 #include <QDebug>
 
 EditorWidget::EditorWidget(QWidget *parent) : QsciScintilla(parent) {
   colorExp.setMinimal(false);
   imgExp.setMinimal(false);
+  gradientExp.setMinimal(false);
   viewport()->setMouseTracking(true);
   initEditor();
 }
@@ -279,5 +281,40 @@ void EditorWidget::mouseMoveEvent(QMouseEvent *event) {
           QStringLiteral(
               "<html><head/><body><p><img src=\"%1\"/></p></body></html>")
               .arg(imgExp.cap(1)));
+  } else if (line > -1 && gradientExp.indexIn(code, 0) != -1) {
+    //    qDebug() << gradientExp.capturedTexts();
+    if (gradientExp.capturedTexts().length() == 3) {
+      QCss::Value value;
+      value.type = QCss::Value::Function;
+      value.variant =
+          (QStringList() << gradientExp.cap(1) << gradientExp.cap(2));
+      QCss::BrushData data = QCss::Parser::parseBrushValue(value, palette());
+      qDebug() << data.brush;
+
+      value.type = QCss::Value::String;
+      value.variant = "red";
+      QCss::ColorData cdata = QCss::Parser::parseColorValue(value);
+      qDebug() << cdata.color << cdata.color.name();
+
+      value.variant = "#12ff0000";
+      cdata = QCss::Parser::parseColorValue(value);
+      qDebug() << cdata.color << cdata.color.name();
+
+      value.type = QCss::Value::Function;
+      value.variant = (QStringList() << "rgb"
+                                     << "25,   23,  64  ");
+      cdata = QCss::Parser::parseColorValue(value);
+      qDebug() << cdata.color << cdata.color.name();
+
+      value.variant = (QStringList() << "rgba"
+                                     << "25,   23,  64  ,0.2");
+      cdata = QCss::Parser::parseColorValue(value);
+      qDebug() << cdata.color << cdata.color.name();
+
+      value.variant = (QStringList() << "rgba"
+                                     << "25,   23,  64  ,200");
+      cdata = QCss::Parser::parseColorValue(value);
+      qDebug() << cdata.color << cdata.color.name();
+    }
   }
 }

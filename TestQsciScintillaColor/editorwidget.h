@@ -26,6 +26,8 @@ class EditorWidget : public QsciScintilla {
 
  private:
   QRegExp imgExp = QRegExp("url\\((\\s*.*\\s*)\\)\\s*");
+  QRegExp gradientExp = QRegExp(
+      "(qlineargradient|qradialgradient|qconicalgradient)\\((.*)\\)\\s*;");
   QRegExp colorExp = QRegExp(
       "([rR][gG][Bb][Aa]?\\((\\s*(2[0-4][0-9]|25[0-5]|[01]?[0-9][0-9]?)\\s*,"
       "\\s*){2}\\s*(2[0-4][0-9]|25[0-5]|[01]?[0-9][0-9]?)\\s*,?\\s*(0\\.\\d{1,"

@@ -24,7 +24,10 @@ void TestColorRegExp::test() {
       "color: BLACK;\n"
       "color: #fff;\n"
       "color: #fff000;\n"
-      "color: #00fff000;\n";
+      "color: #00fff000;\n"
+      "color: qlineargradient(spread:pad, x1:0.298, y1:0.289773, x2:0.745192, "
+      "y2:0.756, stop:0 rgba(0, 165, 255, 232), stop:1 rgba(255, 255, 255, "
+      "255));\n";
 
   QRegExp exp1("#([0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})\\s*;");
   QRegExp exp2("\\s*[^#][a-zA-Z]+\\s*;");
@@ -37,15 +40,19 @@ void TestColorRegExp::test() {
       "\\s*){2}\\s*(2[0-4][0-9]|25[0-5]|[01]?[0-9][0-9]?)\\s*,?\\s*(0\\.\\d{1,"
       "2}|2[0-4][0-9]|25[0-5]|[01]?[0-9][0-9])?\\)\\s*;)|(#([0-9a-fA-F]{3}|[0-"
       "9a-fA-F]{6}|[0-9a-fA-F]{8})\\s*;)|(\\s*[^#][a-zA-Z]+\\s*;)");
+  QRegExp exp5(
+      "(qlineargradient|qradialgradient|qconicalgradient)\\((.*)\\)\\s*;");
   exp1.setMinimal(false);
   exp2.setMinimal(false);
   exp3.setMinimal(false);
   exp4.setMinimal(false);
+  exp5.setMinimal(false);
 
   int pos1 = 0;
   int pos2 = 0;
   int pos3 = 0;
   int pos4 = 0;
+  int pos5 = 0;
 
   while ((pos1 = exp1.indexIn(text, pos1)) != -1) {
     qDebug() << pos1 << pos1 + exp1.matchedLength() << exp1.capturedTexts()
@@ -77,8 +84,13 @@ void TestColorRegExp::test() {
   while ((pos4 = exp4.indexIn(text, pos4)) != -1) {
     qDebug() << exp4.capturedTexts();
     pos4 += exp4.matchedLength();
-    //    qDebug() << exp.capturedTexts();
-    //    qDebug() << exp.cap(0).remove(QRegExp("[;: ]")).toLower();
+  }
+
+  qDebug() << "\n\nexp5\n\n";
+
+  while ((pos5 = exp5.indexIn(text, pos5)) != -1) {
+    qDebug() << exp5.capturedTexts();
+    pos5 += exp5.matchedLength();
   }
 
   /*

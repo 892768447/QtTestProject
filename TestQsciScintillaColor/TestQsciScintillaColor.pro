@@ -1,4 +1,4 @@
-QT       += core gui
+QT       += core gui gui-private
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -18,10 +18,13 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
     editorwidget.cpp \
     main.cpp \
+    qcssparser.cpp \
+    qcssscanner.cpp \
     widget.cpp
 
 HEADERS += \
     editorwidget.h \
+    qcssparser.h \
     widget.h
 
 FORMS += \
