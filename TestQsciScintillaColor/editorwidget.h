@@ -1,7 +1,7 @@
 ﻿#ifndef EDITORWIDGET_H
 #define EDITORWIDGET_H
 #include <Qsci/qsciscintilla.h>
-#include <QColor>
+#include <QBrush>
 #include <QEvent>
 #include <QMouseEvent>
 #include <QPainter>
@@ -10,10 +10,10 @@
 
 struct ColorEntry {
   QRect rect;
-  QColor color;
-  ColorEntry(QRect rect, QColor color) {
+  QBrush brush;
+  ColorEntry(QRect rect, QBrush brush) {
     this->rect = rect;
-    this->color = color;
+    this->brush = brush;
   }
 };
 
@@ -36,6 +36,7 @@ class EditorWidget : public QsciScintilla {
   QList<ColorEntry> colorEntries;
   void parseColors();  //解析文本得到坐标也颜色值
   void initEditor();
+  void testColor();
 
  protected:
   void paintEvent(QPaintEvent *event) override;

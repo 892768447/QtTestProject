@@ -9,6 +9,7 @@ EditorWidget::EditorWidget(QWidget *parent) : QsciScintilla(parent) {
   gradientExp.setMinimal(false);
   viewport()->setMouseTracking(true);
   initEditor();
+  testColor();
 }
 
 int EditorWidget::offsetAsPosition(int start, int offset) {
@@ -120,7 +121,24 @@ void EditorWidget::parseColors() {
         color.setNamedColor(m_text);
       }
       if (color.isValid() && rect.isValid())
-        colorEntries.append(ColorEntry(rect, color));
+        colorEntries.append(ColorEntry(rect, QBrush(color)));
+    }
+    pos += colorExp.matchedLength();
+  }
+
+  //匹配渐变色
+  pos = 0;
+  while ((pos = gradientExp.indexIn(code, pos)) != -1) {
+    if (gradientExp.capturedTexts().length() == 3) {
+      rect = characterRect(start_pos, pos, gradientExp.cap(0));
+      QCss::Value value;
+      value.type = QCss::Value::Function;
+      value.variant =
+          (QStringList() << gradientExp.cap(1) << gradientExp.cap(2));
+      QCss::BrushData data = QCss::Parser::parseBrushValue(value, palette());
+      qDebug() << data.type << data.brush;
+      if (data.type != QCss::BrushData::Invalid)
+        colorEntries.append(ColorEntry(rect, data.brush));
     }
     pos += colorExp.matchedLength();
   }
@@ -249,6 +267,34 @@ void EditorWidget::initEditor() {
   SendScintilla(QsciScintilla::SCI_SETWORDCHARS, lexer->wordCharacters());
 }
 
+void EditorWidget::testColor() {
+  QCss::Value value;
+  value.type = QCss::Value::String;
+  value.variant = "red";
+  QCss::ColorData cdata = QCss::Parser::parseColorValue(value);
+  qDebug() << cdata.color << cdata.color.name();
+
+  value.variant = "#12ff0000";
+  cdata = QCss::Parser::parseColorValue(value);
+  qDebug() << cdata.color << cdata.color.name();
+
+  value.type = QCss::Value::Function;
+  value.variant = (QStringList() << "rgb"
+                                 << "25,   23,  64  ");
+  cdata = QCss::Parser::parseColorValue(value);
+  qDebug() << cdata.color << cdata.color.name();
+
+  value.variant = (QStringList() << "rgba"
+                                 << "25,   23,  64  ,0.2");
+  cdata = QCss::Parser::parseColorValue(value);
+  qDebug() << cdata.color << cdata.color.name();
+
+  value.variant = (QStringList() << "rgba"
+                                 << "25,   23,  64  ,200");
+  cdata = QCss::Parser::parseColorValue(value);
+  qDebug() << cdata.color << cdata.color.name();
+}
+
 void EditorWidget::paintEvent(QPaintEvent *event) {
   QsciScintilla::paintEvent(event);
   // 绘制提取的颜色方框
@@ -256,7 +302,7 @@ void EditorWidget::paintEvent(QPaintEvent *event) {
     QPainter painter(viewport());
     for (ColorEntry entry : colorEntries) {
       painter.setPen(Qt::NoPen);
-      painter.setBrush(entry.color);
+      painter.setBrush(entry.brush);
       painter.drawRect(entry.rect);
     }
     viewport()->update();
@@ -281,40 +327,5 @@ void EditorWidget::mouseMoveEvent(QMouseEvent *event) {
           QStringLiteral(
               "<html><head/><body><p><img src=\"%1\"/></p></body></html>")
               .arg(imgExp.cap(1)));
-  } else if (line > -1 && gradientExp.indexIn(code, 0) != -1) {
-    //    qDebug() << gradientExp.capturedTexts();
-    if (gradientExp.capturedTexts().length() == 3) {
-      QCss::Value value;
-      value.type = QCss::Value::Function;
-      value.variant =
-          (QStringList() << gradientExp.cap(1) << gradientExp.cap(2));
-      QCss::BrushData data = QCss::Parser::parseBrushValue(value, palette());
-      qDebug() << data.brush;
-
-      value.type = QCss::Value::String;
-      value.variant = "red";
-      QCss::ColorData cdata = QCss::Parser::parseColorValue(value);
-      qDebug() << cdata.color << cdata.color.name();
-
-      value.variant = "#12ff0000";
-      cdata = QCss::Parser::parseColorValue(value);
-      qDebug() << cdata.color << cdata.color.name();
-
-      value.type = QCss::Value::Function;
-      value.variant = (QStringList() << "rgb"
-                                     << "25,   23,  64  ");
-      cdata = QCss::Parser::parseColorValue(value);
-      qDebug() << cdata.color << cdata.color.name();
-
-      value.variant = (QStringList() << "rgba"
-                                     << "25,   23,  64  ,0.2");
-      cdata = QCss::Parser::parseColorValue(value);
-      qDebug() << cdata.color << cdata.color.name();
-
-      value.variant = (QStringList() << "rgba"
-                                     << "25,   23,  64  ,200");
-      cdata = QCss::Parser::parseColorValue(value);
-      qDebug() << cdata.color << cdata.color.name();
-    }
   }
 }
