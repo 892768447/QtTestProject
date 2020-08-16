@@ -1,6 +1,7 @@
 ﻿#ifndef EDITORWIDGET_H
 #define EDITORWIDGET_H
 #include <Qsci/qsciscintilla.h>
+
 #include <QBrush>
 #include <QEvent>
 #include <QMouseEvent>
@@ -25,6 +26,7 @@ class EditorWidget : public QsciScintilla {
   QRect characterRect(int start, int offset, QString text);
 
  private:
+  QPixmap alphaBg;
   QRegExp imgExp = QRegExp("url\\((\\s*.*\\s*)\\)\\s*");
   QRegExp gradientExp = QRegExp(
       "(qlineargradient|qradialgradient|qconicalgradient)\\((.*)\\)\\s*;");

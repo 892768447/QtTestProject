@@ -1,4 +1,5 @@
 ﻿#include "testcolorregexp.h"
+
 #include <QDebug>
 #include <QFile>
 #include <QTime>
@@ -27,7 +28,23 @@ void TestColorRegExp::test() {
       "color: #00fff000;\n"
       "color: qlineargradient(spread:pad, x1:0.298, y1:0.289773, x2:0.745192, "
       "y2:0.756, stop:0 rgba(0, 165, 255, 232), stop:1 rgba(255, 255, 255, "
-      "255));\n";
+      "255));\n\n\nQWidget { color: qlineargradient(spread:pad, x1:0.298, "
+      "y1:0.289773, x2:0.745192, y2:0.756, stop:0 rgba(0, 165, 255, 232), "
+      "stop:1 rgba(255, 255, 255, 255)); }\nQWidget { color: "
+      "qlineargradient(spread:repeat, x1:0.298, y1:0.289773, x2:0.745192, "
+      "y2:0.756, stop:0 rgba(0, 165, 255, 232), stop:1 rgba(255, 255, 255, "
+      "255)); }\nQWidget { color: qlineargradient(spread:reflect, x1:0.298, "
+      "y1:0.289773, x2:0.745192, y2:0.756, stop:0 rgba(0, 165, 255, 232), "
+      "stop:1 rgba(255, 255, 255, 255)); }\nQWidget { color: "
+      "qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5, "
+      "stop:0 rgba(0, 165, 255, 232), stop:1 rgba(255, 255, 255, 255)); "
+      "}\nQWidget { color: qradialgradient(spread:repeat, cx:0.5, cy:0.5, "
+      "radius:0.5, fx:0.5, fy:0.5, stop:0 rgba(0, 165, 255, 232), stop:1 "
+      "rgba(255, 255, 255, 255)); }\nQWidget { color: "
+      "qradialgradient(spread:reflect, cx:0.5, cy:0.5, radius:0.5, fx:0.5, "
+      "fy:0.5, stop:0 rgba(0, 165, 255, 232), stop:1 rgba(255, 255, 255, "
+      "255)); }\nQWidget { color: qconicalgradient(cx:0.5, cy:0.5, angle:0, "
+      "stop:0 rgba(0, 165, 255, 232), stop:1 rgba(255, 255, 255, 255)); }\n";
 
   QRegExp exp1("#([0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})\\s*;");
   QRegExp exp2("\\s*[^#][a-zA-Z]+\\s*;");
@@ -46,7 +63,7 @@ void TestColorRegExp::test() {
   exp2.setMinimal(false);
   exp3.setMinimal(false);
   exp4.setMinimal(false);
-  exp5.setMinimal(false);
+  exp5.setMinimal(true);
 
   int pos1 = 0;
   int pos2 = 0;
@@ -89,7 +106,7 @@ void TestColorRegExp::test() {
   qDebug() << "\n\nexp5\n\n";
 
   while ((pos5 = exp5.indexIn(text, pos5)) != -1) {
-    qDebug() << exp5.capturedTexts();
+    qDebug() << exp5.capturedTexts().length() << exp5.capturedTexts();
     pos5 += exp5.matchedLength();
   }
 

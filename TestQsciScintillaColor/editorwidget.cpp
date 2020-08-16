@@ -1,12 +1,14 @@
 ﻿#include "editorwidget.h"
+
 #include <Qsci/qscilexercss.h>
 #include <qcssparser.h>
+
 #include <QDebug>
 
 EditorWidget::EditorWidget(QWidget *parent) : QsciScintilla(parent) {
   colorExp.setMinimal(false);
   imgExp.setMinimal(false);
-  gradientExp.setMinimal(false);
+  gradientExp.setMinimal(true);
   viewport()->setMouseTracking(true);
   initEditor();
   testColor();
@@ -129,19 +131,20 @@ void EditorWidget::parseColors() {
   //匹配渐变色
   pos = 0;
   while ((pos = gradientExp.indexIn(code, pos)) != -1) {
-    if (gradientExp.capturedTexts().length() == 3) {
-      rect = characterRect(start_pos, pos, gradientExp.cap(0));
+    QStringList texts = gradientExp.capturedTexts();
+    if (texts.length() == 3) {
+      rect = characterRect(start_pos, pos, texts.takeFirst());
       QCss::Value value;
       value.type = QCss::Value::Function;
-      value.variant =
-          (QStringList() << gradientExp.cap(1) << gradientExp.cap(2));
+      value.variant = texts;
       QCss::BrushData data = QCss::Parser::parseBrushValue(value, palette());
-      qDebug() << data.type << data.brush;
-      if (data.type != QCss::BrushData::Invalid)
+      if (data.type == QCss::BrushData::Brush)
         colorEntries.append(ColorEntry(rect, data.brush));
     }
-    pos += colorExp.matchedLength();
+    pos += gradientExp.matchedLength();
   }
+
+  viewport()->update();
 }
 
 /**
@@ -269,43 +272,140 @@ void EditorWidget::initEditor() {
 
 void EditorWidget::testColor() {
   QCss::Value value;
+  QCss::ColorData cdata;
+  QCss::BrushData bdata;
+  // test red
   value.type = QCss::Value::String;
-  value.variant = "red";
-  QCss::ColorData cdata = QCss::Parser::parseColorValue(value);
-  qDebug() << cdata.color << cdata.color.name();
-
-  value.variant = "#12ff0000";
+  value.variant = QVariant("red");
   cdata = QCss::Parser::parseColorValue(value);
-  qDebug() << cdata.color << cdata.color.name();
+  qDebug() << cdata.color;
 
+  // test #ff0000db  格式是RGBA
+  value.type = QCss::Value::String;
+  value.variant = "#ff0000db";
+  cdata = QCss::Parser::parseColorValue(value);
+  qDebug() << cdata.color;
+
+  // test rgb(25,23,64)
   value.type = QCss::Value::Function;
   value.variant = (QStringList() << "rgb"
                                  << "25,   23,  64  ");
   cdata = QCss::Parser::parseColorValue(value);
-  qDebug() << cdata.color << cdata.color.name();
+  qDebug() << cdata.color << cdata.color.alpha();
 
+  // test rgba(25, 23, 64, 0.2)
+  value.type = QCss::Value::Function;
   value.variant = (QStringList() << "rgba"
                                  << "25,   23,  64  ,0.2");
   cdata = QCss::Parser::parseColorValue(value);
-  qDebug() << cdata.color << cdata.color.name();
+  qDebug() << cdata.color << cdata.color.alpha();
 
+  // test rgba(25, 23, 64, 200)
+  value.type = QCss::Value::Function;
   value.variant = (QStringList() << "rgba"
                                  << "25,   23,  64  ,200");
   cdata = QCss::Parser::parseColorValue(value);
-  qDebug() << cdata.color << cdata.color.name();
+  qDebug() << cdata.color << cdata.color.alpha();
+
+  // test qlineargradient(spread:pad, x1:0.298, y1:0.289773, x2:0.745192,
+  // y2:0.756, stop:0 rgba(0, 165, 255, 232), stop:1 rgba(255, 255, 255, 255))
+  value.type = QCss::Value::Function;
+  value.variant =
+      (QStringList()
+       << "qlineargradient"
+       << "spread:pad, x1:0.298, y1:0.289773, x2:0.745192, y2:0.756, stop:0 "
+          "rgba(0, 165, 255, 232), stop:1 rgba(255, 255, 255, 255)");
+  bdata = QCss::Parser::parseBrushValue(value, palette());
+  qDebug() << bdata.brush << bdata.type;
+
+  // test qlineargradient(spread:repeat, x1:0.298, y1:0.289773, x2:0.745192,
+  // y2:0.756, stop:0 rgba(0, 165, 255, 232), stop:1 rgba(255, 255, 255, 255))
+  value.type = QCss::Value::Function;
+  value.variant =
+      (QStringList()
+       << "qlineargradient"
+       << "spread:repeat, x1:0.298, y1:0.289773, x2:0.745192, y2:0.756, stop:0 "
+          "rgba(0, 165, 255, 232), stop:1 rgba(255, 255, 255, 255)");
+  bdata = QCss::Parser::parseBrushValue(value, palette());
+  qDebug() << bdata.brush << bdata.type;
+
+  // test qlineargradient(spread:reflect, x1:0.298, y1:0.289773, x2:0.745192,
+  // y2:0.756, stop:0 rgba(0, 165, 255, 232), stop:1 rgba(255, 255, 255, 255))
+  value.type = QCss::Value::Function;
+  value.variant =
+      (QStringList()
+       << "qlineargradient"
+       << "spread:reflect, x1:0.298, y1:0.289773, x2:0.745192, y2:0.756, "
+          "stop:0 rgba(0, 165, 255, 232), stop:1 rgba(255, 255, 255, 255)");
+  bdata = QCss::Parser::parseBrushValue(value, palette());
+  qDebug() << bdata.brush << bdata.type;
+
+  // test qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.5, fx:0.5,
+  // fy:0.5, stop:0 rgba(0, 165, 255, 232), stop:1 rgba(255, 255, 255, 255))
+  value.type = QCss::Value::Function;
+  value.variant =
+      (QStringList()
+       << "qradialgradient"
+       << "spread:pad, cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5, stop:0 "
+          "rgba(0, 165, 255, 232), stop:1 rgba(255, 255, 255, 255)");
+  bdata = QCss::Parser::parseBrushValue(value, palette());
+  qDebug() << bdata.brush << bdata.type;
+
+  // test qradialgradient(spread:repeat, cx:0.5, cy:0.5, radius:0.5, fx:0.5,
+  // fy:0.5, stop:0 rgba(0, 165, 255, 232), stop:1 rgba(255, 255, 255, 255))
+  value.type = QCss::Value::Function;
+  value.variant =
+      (QStringList()
+       << "qradialgradient"
+       << "spread:repeat, cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5, stop:0 "
+          "rgba(0, 165, 255, 232), stop:1 rgba(255, 255, 255, 255)");
+  bdata = QCss::Parser::parseBrushValue(value, palette());
+  qDebug() << bdata.brush << bdata.type;
+
+  // test qradialgradient(spread:reflect, cx:0.5, cy:0.5, radius:0.5, fx:0.5,
+  // fy:0.5, stop:0 rgba(0, 165, 255, 232), stop:1 rgba(255, 255, 255, 255))
+  value.type = QCss::Value::Function;
+  value.variant =
+      (QStringList()
+       << "qradialgradient"
+       << "spread:reflect, cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5, stop:0 "
+          "rgba(0, 165, 255, 232), stop:1 rgba(255, 255, 255, 255)");
+  bdata = QCss::Parser::parseBrushValue(value, palette());
+  qDebug() << bdata.brush << bdata.type;
+
+  // test qconicalgradient(cx:0.5, cy:0.5, angle:0, stop:0 rgba(0, 165, 255,
+  // 232), stop:1 rgba(255, 255, 255, 255))
+  value.type = QCss::Value::Function;
+  value.variant =
+      (QStringList() << "qconicalgradient"
+                     << "cx:0.5, cy:0.5, angle:0, stop:0 rgba(0, 165, 255, "
+                        "232), stop:1 rgba(255, 255, 255, 255)");
+  bdata = QCss::Parser::parseBrushValue(value, palette());
+  qDebug() << bdata.brush << bdata.type;
 }
 
 void EditorWidget::paintEvent(QPaintEvent *event) {
   QsciScintilla::paintEvent(event);
   // 绘制提取的颜色方框
   if (colorEntries.size()) {
+    const int pixSize = 5;
     QPainter painter(viewport());
+    // 绘制模拟白黑透明块
+    if (alphaBg.isNull()) {
+      alphaBg = QPixmap(2 * pixSize, 2 * pixSize);
+      QPainter pmp;
+      pmp.begin(&alphaBg);
+      pmp.fillRect(0, 0, pixSize, pixSize, Qt::white);
+      pmp.fillRect(pixSize, pixSize, pixSize, pixSize, Qt::white);
+      pmp.fillRect(0, pixSize, pixSize, pixSize, Qt::black);
+      pmp.fillRect(pixSize, 0, pixSize, pixSize, Qt::black);
+      pmp.end();
+    }
     for (ColorEntry entry : colorEntries) {
       painter.setPen(Qt::NoPen);
-      painter.setBrush(entry.brush);
-      painter.drawRect(entry.rect);
+      painter.fillRect(entry.rect, QBrush(alphaBg));
+      painter.fillRect(entry.rect, entry.brush);
     }
-    viewport()->update();
   }
   parseColors();
 }
