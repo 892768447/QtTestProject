@@ -85,61 +85,74 @@ void EditorWidget::parseColors() {
   colorEntries.clear();
   // 通过3种正则匹配文字区域并计算所在坐标
   int pos = 0;
-  QColor color;
+  //  QColor color;
   QRect rect;
+  QCss::Value value;
+  QCss::ColorData cdata;
+  QCss::BrushData bdata;
   while ((pos = colorExp.indexIn(code, pos)) != -1) {
     if (colorExp.matchedLength()) {
       QString m_text = colorExp.cap(0).toLower();
       rect = characterRect(start_pos, pos, m_text);
-      color.setAlpha(255);
+      //      color.setAlpha(255);
       if (m_text.startsWith("rgb")) {
         //去掉字符串中的rgba ();等其它字符
+        QString rgb_text = m_text.startsWith("rgba") ? "rgba" : "rgb";
         m_text.remove(QRegExp("[^\\d,.]"));
+        value.type = QCss::Value::Function;
+        value.variant = (QStringList() << rgb_text << m_text);
         //        qDebug() << m_text;
-        QStringList color_list = m_text.split(",");
-        if (color_list.length() >= 3) {
-          color.setRed(color_list.at(0).toInt());    // Red
-          color.setGreen(color_list.at(1).toInt());  // Green
-          color.setBlue(color_list.at(2).toInt());   // Blue
-          if (color_list.length() >= 4) {
-            if (color_list.at(3).length() > 0) {
-              // Alpha
-              if (color_list.at(3).toInt() > 1)
-                color.setAlpha(color_list.at(3).toInt());
-              else
-                color.setAlphaF(color_list.at(3).toFloat());
-            }
-          }
-        }
+        //        QStringList color_list = m_text.split(",");
+        //        if (color_list.length() >= 3) {
+        //          color.setRed(color_list.at(0).toInt());    // Red
+        //          color.setGreen(color_list.at(1).toInt());  // Green
+        //          color.setBlue(color_list.at(2).toInt());   // Blue
+        //          if (color_list.length() >= 4) {
+        //            if (color_list.at(3).length() > 0) {
+        //              // Alpha
+        //              if (color_list.at(3).toInt() > 1)
+        //                color.setAlpha(color_list.at(3).toInt());
+        //              else
+        //                color.setAlphaF(color_list.at(3).toFloat());
+        //            }
+        //          }
+        //        }
       } else if (m_text.startsWith("#")) {
         // 去掉字符串其它字符
         m_text.remove(QRegExp("[^#0-9a-fA-F]"));
         //        qDebug() << m_text;
-        color.setNamedColor(m_text);
+        //        color.setNamedColor(m_text);
+        value.type = QCss::Value::String;
+        value.variant = m_text;
       } else {
         // 去掉字符串其它字符
         m_text.remove(QRegExp("[^a-zA-Z]"));
         //        qDebug() << m_text;
-        color.setNamedColor(m_text);
+        //        color.setNamedColor(m_text);
+        value.type = QCss::Value::String;
+        value.variant = m_text;
       }
-      if (color.isValid() && rect.isValid())
-        colorEntries.append(ColorEntry(rect, QBrush(color)));
+      //      if (color.isValid() && rect.isValid())
+      //        colorEntries.append(ColorEntry(rect, QBrush(color)));
+      cdata = QCss::Parser::parseColorValue(value);
+      if (cdata.type == QCss::ColorData::Color && cdata.color.isValid() &&
+          rect.isValid())
+        colorEntries.append(ColorEntry(rect, QBrush(cdata.color)));
     }
     pos += colorExp.matchedLength();
   }
 
   //匹配渐变色
   pos = 0;
+  value.type = QCss::Value::Function;
   while ((pos = gradientExp.indexIn(code, pos)) != -1) {
     QStringList texts = gradientExp.capturedTexts();
     if (texts.length() == 3) {
       rect = characterRect(start_pos, pos, texts.takeFirst());
-      QCss::Value value;
-      value.type = QCss::Value::Function;
       value.variant = texts;
-      QCss::BrushData data = QCss::Parser::parseBrushValue(value, palette());
-      if (data.type == QCss::BrushData::Brush)
-        colorEntries.append(ColorEntry(rect, data.brush));
+      bdata = QCss::Parser::parseBrushValue(value, palette());
+      if (bdata.type == QCss::BrushData::Brush && rect.isValid())
+        colorEntries.append(ColorEntry(rect, bdata.brush));
     }
     pos += gradientExp.matchedLength();
   }
