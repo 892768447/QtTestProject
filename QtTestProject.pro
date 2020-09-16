@@ -4,4 +4,5 @@ SUBDIRS += \
   TestColorRegExp \
   TestDrawText \
   TestEditorColorWords \
-  TestQsciScintillaColor
+  TestQsciScintillaColor \
+  TestQtScript
