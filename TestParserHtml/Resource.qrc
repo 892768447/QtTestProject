@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/">
+        <file>style/offline.css</file>
+        <file>style/offline-simple.css</file>
+        <file>qwidget.html</file>
+    </qresource>
+</RCC>
