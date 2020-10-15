@@ -6,4 +6,5 @@ SUBDIRS += \
   TestEditorColorWords \
   TestQLocale \
   TestQsciScintillaColor \
-  TestQtScript
+  TestQtScript \
+  TestWidgetFps
